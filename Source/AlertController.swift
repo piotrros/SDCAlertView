@@ -281,12 +281,32 @@ public final class AlertController: UIViewController {
         }
     }
 
-    private func listenForKeyboardChanges() {
-        NotificationCenter.default
-            .addObserver(self, selector: #selector(self.keyboardChange),
-                         name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
-    }
+//    private func listenForKeyboardChanges() {
+//        NotificationCenter.default
+//            .addObserver(self, selector: #selector(self.keyboardChange),
+//                         name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
+//    }
 
+    private func listenForKeyboardChanges() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    @objc private func keyboardWillShow(notification: NSNotification) {
+        let newFrameValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue
+        guard let newFrame = newFrameValue?.cgRectValue else {
+            return
+        }
+        
+        self.verticalCenter?.constant = -newFrame.height / 2
+        self.alert.layoutIfNeeded()
+    }
+    
+    @objc private func keyboardWillHide(notification: NSNotification){
+        self.verticalCenter?.constant = 0
+        self.alert.layoutIfNeeded()
+    }
+    
     @objc
     private func keyboardChange(_ notification: Notification) {
         let newFrameValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue
